@@ -1,6 +1,5 @@
 const products = [
   {
-    _id: "1",
     name: "Becoming",
     image: "/images/becoming.jpg",
     description:
@@ -13,7 +12,6 @@ const products = [
     numReviews: 12,
   },
   {
-    _id: "2",
     name: "Suheldev & the Battle of Bahraich",
     image: "/images/suheldev-the-battle-of-bahraich.jpg",
     description:
@@ -26,7 +24,6 @@ const products = [
     numReviews: 8,
   },
   {
-    _id: "3",
     name: "The Tattooist of Auschwitz",
     image: "/images/the-tattooist-of-auschwitz.jpg",
     description:
@@ -39,7 +36,6 @@ const products = [
     numReviews: 12,
   },
   {
-    _id: "4",
     name: "And Then There Were None",
     image: "/images/and-then-there-were-none.jpg",
     description:
@@ -52,7 +48,6 @@ const products = [
     numReviews: 12,
   },
   {
-    _id: "5",
     name: "1984",
     image: "/images/1984.jpg",
     description:
@@ -65,7 +60,6 @@ const products = [
     numReviews: 10,
   },
   {
-    _id: "6",
     name: "A Short History of Nearly Everything",
     image: "/images/a-short-history-of-nearly-everything.jpg",
     description:
@@ -78,7 +72,6 @@ const products = [
     numReviews: 12,
   },
   {
-    _id: "7",
     name: "The Girl with the Dragon Tattoo",
     image: "/images/the-girl-with-the-dragon-tattoo.jpg",
     description:
@@ -91,7 +84,6 @@ const products = [
     numReviews: 5,
   },
   {
-    _id: "8",
     name: "The Diary of a Young Girl",
     image: "/images/the-diary-of-a-young-girl.jpg",
     description:
