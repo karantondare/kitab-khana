@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Row, Col } from "react-bootstrap";
-import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
 import Product from "../components/Product";
 import { listProducts } from "../actions/productActions";
