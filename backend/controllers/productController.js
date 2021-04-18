@@ -58,7 +58,7 @@ const createProduct = asyncHandler(async (req, res) => {
   res.status(201).json(createdProduct);
 });
 
-//@desc    create a product
+//@desc    update a product
 //@route   POST /api/products
 //@access  public/admin
 const updateProduct = asyncHandler(async (req, res) => {

@@ -12,6 +12,7 @@ const RegisterScreen = ({ location, history }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState(null);
 
   const dispatch = useDispatch();
@@ -66,11 +67,16 @@ const RegisterScreen = ({ location, history }) => {
         <Form.Group controlId="password">
           <Form.Label>Password</Form.Label>
           <Form.Control
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           ></Form.Control>
+          <Form.Check
+            type="checkbox"
+            label="Show Password"
+            onChange={() => setShowPassword(!showPassword)}
+          />
         </Form.Group>
 
         <Form.Group controlId="confirmPassword">
@@ -90,7 +96,7 @@ const RegisterScreen = ({ location, history }) => {
 
       <Row className="py-3">
         <Col>
-          Have an Account?{" "}
+          Already have an Account?{" "}
           <Link to={redirect ? `/login?redirect=${redirect}` : "/login"}>
             Login
           </Link>

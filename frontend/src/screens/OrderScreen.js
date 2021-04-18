@@ -1,15 +1,25 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Row, Col, ListGroup, Image, Card } from "react-bootstrap";
+import { Row, Col, ListGroup, Image, Card, Button } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { PayPalButton } from "react-paypal-button-v2";
-import { getOrderDetails, payOrder } from "../actions/orderActions";
-import { ORDER_PAY_RESET } from "../constants/orderConstants";
+import {
+  getOrderDetails,
+  payOrder,
+  deliveredOrder,
+} from "../actions/orderActions";
+import {
+  ORDER_PAY_RESET,
+  ORDER_DELIVERED_REQUEST,
+  ORDER_DELIVERED_SUCCESS,
+  ORDER_DELIVERED_FAIL,
+  ORDER_DELIVERED_RESET,
+} from "../constants/orderConstants";
 import Loader from "../components/Loader";
 import Message from "../components/Message";
 
-const OrderScreen = ({ match }) => {
+const OrderScreen = ({ match, history }) => {
   const dispatch = useDispatch();
   const orderId = match.params.id;
   const [sdkReady, setSdkReady] = useState(false);
@@ -23,15 +33,21 @@ const OrderScreen = ({ match }) => {
       .then((res) => res.json())
       .then((data) => {
         setConversionRate(data.conversion_rates["INR"]);
-        // console.log(conversionRate.toFixed(2));
       });
   };
   getLatestConversionRate();
 
   const { order, loading, error } = useSelector((state) => state.orderDetails);
 
-  const orderPay = useSelector((state) => state.orderPay);
-  const { loading: loadingPay, success: successPay } = orderPay;
+  const { loading: loadingPay, success: successPay } = useSelector(
+    (state) => state.orderPay
+  );
+
+  const { loading: loadingDelivered, success: successDelivered } = useSelector(
+    (state) => state.orderDelivered
+  );
+
+  const { userInfo } = useSelector((state) => state.userLogin);
 
   if (!loading && order) {
     const addDecimals = (num) => {
@@ -51,6 +67,10 @@ const OrderScreen = ({ match }) => {
   }
 
   useEffect(() => {
+    if (!userInfo) {
+      history.push("/login");
+    }
+
     const addPayPalScript = async () => {
       const { data: clientId } = await axios.get("/api/config/paypal");
       const script = document.createElement("script");
@@ -63,8 +83,10 @@ const OrderScreen = ({ match }) => {
       document.body.appendChild(script);
     };
 
-    if (!order || successPay) {
+    if (!order || successPay || successDelivered) {
       dispatch({ type: ORDER_PAY_RESET });
+      dispatch({ type: ORDER_DELIVERED_RESET });
+
       dispatch(getOrderDetails(orderId));
     } else if (!order.isPaid) {
       if (!window.paypal) {
@@ -73,11 +95,15 @@ const OrderScreen = ({ match }) => {
         setSdkReady(true);
       }
     }
-  }, [dispatch, orderId, successPay, order]);
+  }, [dispatch, orderId, successPay, order, successDelivered]);
 
   const successPaymentHandler = (paymentResult) => {
     console.log(paymentResult);
     dispatch(payOrder(orderId, paymentResult));
+  };
+
+  const deliveredHandler = () => {
+    dispatch(deliveredOrder(order));
   };
 
   return loading ? (
@@ -86,7 +112,7 @@ const OrderScreen = ({ match }) => {
     <Message variant="danger">{error}</Message>
   ) : (
     <>
-      <h1>Order no : {order._id}</h1>
+      <h1>Order {order._id}</h1>
       <Row>
         <Col md={8}>
           <ListGroup variant="flush">
@@ -101,7 +127,7 @@ const OrderScreen = ({ match }) => {
               </p>
               <p>
                 <strong>Address:</strong>
-                {order.shippingAddress.address}, {order.shippingAddress.city} -{" "}
+                {order.shippingAddress.address}, {order.shippingAddress.city}{" "}
                 {order.shippingAddress.postalCode},{" "}
                 {order.shippingAddress.country}
               </p>
@@ -130,13 +156,13 @@ const OrderScreen = ({ match }) => {
             <ListGroup.Item>
               <h2>Order Items</h2>
               {order.orderItems.length === 0 ? (
-                <Message>Your cart is empty</Message>
+                <Message>Order is empty</Message>
               ) : (
                 <ListGroup variant="flush">
                   {order.orderItems.map((item, index) => (
                     <ListGroup.Item key={index}>
                       <Row>
-                        <Col md={2}>
+                        <Col md={1}>
                           <Image
                             src={item.image}
                             alt={item.name}
@@ -145,12 +171,12 @@ const OrderScreen = ({ match }) => {
                           />
                         </Col>
                         <Col>
-                          <Link to={`/product/₹{item.product}`}>
+                          <Link to={`/product/${item.product}`}>
                             {item.name}
                           </Link>
                         </Col>
                         <Col md={4}>
-                          {item.qty} x ₹{item.price} = ₹{item.qty * item.price}
+                          {item.qty} x ${item.price} = ${item.qty * item.price}
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -169,19 +195,25 @@ const OrderScreen = ({ match }) => {
               <ListGroup.Item>
                 <Row>
                   <Col>Items</Col>
-                  <Col>₹{order.itemsPrice}</Col>
+                  <Col>${order.itemsPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Shipping</Col>
-                  <Col>₹{order.shippingPrice}</Col>
+                  <Col>${order.shippingPrice}</Col>
+                </Row>
+              </ListGroup.Item>
+              <ListGroup.Item>
+                <Row>
+                  <Col>Tax</Col>
+                  <Col>${order.taxPrice}</Col>
                 </Row>
               </ListGroup.Item>
               <ListGroup.Item>
                 <Row>
                   <Col>Total</Col>
-                  <Col>₹{order.totalPrice}</Col>
+                  <Col>${order.totalPrice}</Col>
                 </Row>
               </ListGroup.Item>
               {!order.isPaid && (
@@ -191,21 +223,27 @@ const OrderScreen = ({ match }) => {
                     <Loader />
                   ) : (
                     <PayPalButton
-                      amount={paypalPrice}
+                      amount={order.totalPrice}
                       onSuccess={successPaymentHandler}
                     />
                   )}
                 </ListGroup.Item>
               )}
-              {!order.isPaid && (
-                <ListGroup.Item>
-                  <h5>
-                    <strong>Use these credentials for payment</strong>
-                  </h5>
-                  <p>test email: test@karan.com </p>
-                  <p>test password: test123123</p>
-                </ListGroup.Item>
-              )}
+              {loadingDelivered && <Loader />}
+              {userInfo &&
+                userInfo.isAdmin &&
+                order.isPaid &&
+                !order.isDelivered && (
+                  <ListGroup.Item>
+                    <Button
+                      type="button"
+                      className="btn btn-block"
+                      onClick={deliveredHandler}
+                    >
+                      Mark As Delivered
+                    </Button>
+                  </ListGroup.Item>
+                )}
             </ListGroup>
           </Card>
         </Col>

@@ -10,6 +10,7 @@ import { login } from "../actions/userActions";
 const LoginScreen = ({ location, history }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -48,11 +49,19 @@ const LoginScreen = ({ location, history }) => {
         <Form.Group controlId="password">
           <Form.Label>Password Address</Form.Label>
           <Form.Control
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="Enter password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           ></Form.Control>
+        </Form.Group>
+
+        <Form.Group controlId="showPassword">
+          <Form.Check
+            type="checkbox"
+            label="Show Password"
+            onChange={() => setShowPassword(!showPassword)}
+          />
         </Form.Group>
 
         <Button type="submit" variant="primary">
@@ -62,9 +71,9 @@ const LoginScreen = ({ location, history }) => {
 
       <Row className="py-3">
         <Col>
-          New Customer?{" "}
+          New to Kitab Khana?{" "}
           <Link to={redirect ? `/register?redirect=${redirect}` : "/register"}>
-            Register
+            Create your account
           </Link>
         </Col>
       </Row>
