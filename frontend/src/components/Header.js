@@ -3,6 +3,7 @@ import { LinkContainer } from "react-router-bootstrap";
 import { Container, Nav, Navbar, NavDropdown } from "react-bootstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../actions/userActions";
+import { EMPTY_CART } from "../constants/cartConstants";
 
 const Header = () => {
   const dispatch = useDispatch();
@@ -17,7 +18,9 @@ const Header = () => {
       <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
         <Container>
           <LinkContainer to="/">
-            <Navbar.Brand>The Online Book Store</Navbar.Brand>
+            <Navbar.Brand>
+              <h2>Kitab Khana</h2>
+            </Navbar.Brand>
           </LinkContainer>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
           <Navbar.Collapse id="basic-navbar-nav">
@@ -42,6 +45,19 @@ const Header = () => {
                     <i className="fas fa-user"></i>Sign In
                   </Nav.Link>
                 </LinkContainer>
+              )}
+              {userInfo && userInfo.isAdmin && (
+                <NavDropdown title="Admin" id="adminmenu">
+                  <LinkContainer to="/admin/userlist">
+                    <NavDropdown.Item>Users</NavDropdown.Item>
+                  </LinkContainer>
+                  <LinkContainer to="/admin/productlist">
+                    <NavDropdown.Item>Products</NavDropdown.Item>
+                  </LinkContainer>
+                  <LinkContainer to="/admin/orderList">
+                    <NavDropdown.Item>Orders</NavDropdown.Item>
+                  </LinkContainer>
+                </NavDropdown>
               )}
             </Nav>
           </Navbar.Collapse>

@@ -13,6 +13,20 @@ const OrderScreen = ({ match }) => {
   const dispatch = useDispatch();
   const orderId = match.params.id;
   const [sdkReady, setSdkReady] = useState(false);
+  let [conversionRate, setConversionRate] = useState(70);
+  let paypalPrice;
+
+  const getLatestConversionRate = async () => {
+    fetch(
+      `https://v6.exchangerate-api.com/v6/58c913a5c4f02c864d29f7cf/latest/USD`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        setConversionRate(data.conversion_rates["INR"]);
+        // console.log(conversionRate.toFixed(2));
+      });
+  };
+  getLatestConversionRate();
 
   const { order, loading, error } = useSelector((state) => state.orderDetails);
 
@@ -32,10 +46,13 @@ const OrderScreen = ({ match }) => {
     ).toFixed(2);
   }
 
+  if (order) {
+    paypalPrice = (order.totalPrice / conversionRate).toFixed(2);
+  }
+
   useEffect(() => {
     const addPayPalScript = async () => {
       const { data: clientId } = await axios.get("/api/config/paypal");
-      console.log(clientId);
       const script = document.createElement("script");
       script.type = "text/javascript";
       script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}`;
@@ -84,7 +101,7 @@ const OrderScreen = ({ match }) => {
               </p>
               <p>
                 <strong>Address:</strong>
-                {order.shippingAddress.address}, {order.shippingAddress.city}
+                {order.shippingAddress.address}, {order.shippingAddress.city} -{" "}
                 {order.shippingAddress.postalCode},{" "}
                 {order.shippingAddress.country}
               </p>
@@ -174,7 +191,7 @@ const OrderScreen = ({ match }) => {
                     <Loader />
                   ) : (
                     <PayPalButton
-                      amount={order.totalPrice}
+                      amount={paypalPrice}
                       onSuccess={successPaymentHandler}
                     />
                   )}
@@ -182,7 +199,10 @@ const OrderScreen = ({ match }) => {
               )}
               {!order.isPaid && (
                 <ListGroup.Item>
-                  <p>test email:test@karan.com </p>
+                  <h5>
+                    <strong>Use these credentials for payment</strong>
+                  </h5>
+                  <p>test email: test@karan.com </p>
                   <p>test password: test123123</p>
                 </ListGroup.Item>
               )}
