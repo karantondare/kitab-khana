@@ -6,7 +6,6 @@ import {} from "../actions/cartActions";
 import { createOrder } from "../actions/orderActions";
 import CheckoutSteps from "../components/CheckoutSteps";
 import Message from "../components/Message";
-import { EMPTY_CART } from "../constants/cartConstants";
 
 const PlaceOrderScreen = ({ history }) => {
   const cart = useSelector((state) => state.cart);

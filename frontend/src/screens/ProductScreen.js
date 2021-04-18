@@ -43,7 +43,9 @@ const ProductScreen = ({ history, match }) => {
       ) : (
         <Row>
           <Col md={3}>
-            <Image src={product.image} alt={product.name} fluid />
+            <div className="d-flex justify-content-center">
+              <Image src={product.image} alt={product.name} fluid />
+            </div>
             <Card>
               <ListGroup variant="flush">
                 <ListGroup.Item>

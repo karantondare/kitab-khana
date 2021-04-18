@@ -11,9 +11,6 @@ import {
 } from "../actions/orderActions";
 import {
   ORDER_PAY_RESET,
-  ORDER_DELIVERED_REQUEST,
-  ORDER_DELIVERED_SUCCESS,
-  ORDER_DELIVERED_FAIL,
   ORDER_DELIVERED_RESET,
 } from "../constants/orderConstants";
 import Loader from "../components/Loader";
@@ -95,7 +92,15 @@ const OrderScreen = ({ match, history }) => {
         setSdkReady(true);
       }
     }
-  }, [dispatch, orderId, successPay, order, successDelivered]);
+  }, [
+    dispatch,
+    orderId,
+    successPay,
+    order,
+    successDelivered,
+    history,
+    userInfo,
+  ]);
 
   const successPaymentHandler = (paymentResult) => {
     console.log(paymentResult);
@@ -223,7 +228,7 @@ const OrderScreen = ({ match, history }) => {
                     <Loader />
                   ) : (
                     <PayPalButton
-                      amount={order.totalPrice}
+                      amount={paypalPrice}
                       onSuccess={successPaymentHandler}
                     />
                   )}
